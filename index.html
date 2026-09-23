@@ -269,10 +269,9 @@
       return true;
     }
 
-    // MAPEO AMPLIADO Y ROBUSO DE COLUMNAS DE EXCEL / CSV
     function getValorCampo(item, posiblesNombres) {
       for (let nombre of posiblesNombres) {
-        const claveEncontrada = Object.keys(item).find(k => k.trim().toUpperCase() === nombre.toUpperCase());
+        const claveEncontrada = Object.keys(item).find(k => k.trim().toLowerCase() === nombre.toLowerCase());
         if (claveEncontrada && item[claveEncontrada] !== undefined && item[claveEncontrada] !== null) {
           const val = item[claveEncontrada].toString().trim();
           if (esValorValido(val)) return val;
@@ -282,7 +281,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      const posiblesArchivos = ["CARACTERIZACIÓN.xlsx", "CARACTERIZACIÓN.csv", "CARACTERIZACION.xlsx", "CARACTERIZACION.csv", "caracterizacion.csv", "caracterizacion.xlsx"];
+      const posiblesArchivos = ["CARACTERIZACIÓN.xlsx", "CARACTERIZACIÓN.csv", "CARACTERIZACION.xlsx", "CARACTERIZACION.csv"];
       intentarCargarArchivos(posiblesArchivos, 0);
 
       document.getElementById("input-busqueda").addEventListener("input", renderizarApp);
@@ -323,10 +322,10 @@
         valores.forEach(v => { const opt = document.createElement("option"); opt.value = v; opt.textContent = v; select.appendChild(opt); });
       };
 
-      llenarSelect("filtro-planta", extraerUnicos(["PLANTA", "UBICACIÓN / PLANTA", "UBICACION / PLANTA", "UBICACION", "UBICACIÓN", "SITIO"]));
-      llenarSelect("filtro-tipo", extraerUnicos(["TIPO", "TIPO DE MAQUINA", "TIPO MAQUINA", "TIPO_MAQUINA", "CATEGORIA"]));
+      llenarSelect("filtro-planta", extraerUnicos(["PLANTA", "UBICACION", "UBICACIÓN", "SITIO", "UBICACIÓN / PLANTA"]));
+      llenarSelect("filtro-tipo", extraerUnicos(["TIPO DE MAQUINA", "TIPO MAQUINA", "TIPO_MAQUINA", "TIPO", "CATEGORIA"]));
       llenarSelect("filtro-estado", extraerUnicos(["ESTADO", "ESTADO_EQUIPO", "STATUS"]));
-      llenarSelect("filtro-fabricante", extraerUnicos(["MARCA / FABRICANTE", "FABRICANTE", "MARCA", "PROVEEDOR"]));
+      llenarSelect("filtro-fabricante", extraerUnicos(["FABRICANTE", "MARCA", "PROVEEDOR", "MARCA / FABRICANTE"]));
     }
 
     function probarSiguienteImagen(imgElement, codigoOriginal) {
@@ -348,13 +347,13 @@
       const fFabricante = document.getElementById("filtro-fabricante").value;
 
       const keysCodigo = ["CÓDIGO", "CODIGO", "COD_ORACLE", "CODIGO ORACLE"];
-      const keysDescrip = ["DESCRIPCION", "DESCRIPCIÓN", "EQUIPO", "NOMBRE", "DESCRIPCION CORTA", "DESCRIPCIÓN CORTA"];
+      const keysDescrip = ["DESCRIPCION", "DESCRIPCIÓN", "EQUIPO", "NOMBRE", "DESCRIPCION CORTA"];
       const keysModelo = ["MODELO"];
-      const keysPlanta = ["PLANTA", "UBICACIÓN / PLANTA", "UBICACION / PLANTA", "UBICACION", "UBICACIÓN", "SITIO"];
-      const keysTipo = ["TIPO", "TIPO DE MAQUINA", "TIPO MAQUINA", "TIPO_MAQUINA", "CATEGORIA"];
+      const keysPlanta = ["PLANTA", "UBICACION", "UBICACIÓN", "SITIO", "UBICACIÓN / PLANTA"];
+      const keysTipo = ["TIPO DE MAQUINA", "TIPO MAQUINA", "TIPO_MAQUINA", "TIPO", "CATEGORIA"];
       const keysEstado = ["ESTADO", "ESTADO_EQUIPO", "STATUS"];
-      const keysFab = ["MARCA / FABRICANTE", "FABRICANTE", "MARCA", "PROVEEDOR"];
-      const keysVoltaje = ["VOLTAJE (V)", "VOLTAJE", "VOLTS"];
+      const keysFab = ["FABRICANTE", "MARCA", "PROVEEDOR", "MARCA / FABRICANTE"];
+      const keysVoltaje = ["VOLTAJE", "VOLTS", "VOLTAJE (V)"];
 
       const filtrados = datosEquipos.filter(item => {
         const codigo = getValorCampo(item, keysCodigo).toLowerCase();
@@ -419,7 +418,7 @@
 
     function abrirModal(item) {
       const keysCodigo = ["CÓDIGO", "CODIGO", "COD_ORACLE", "CODIGO ORACLE"];
-      const keysDescrip = ["DESCRIPCION", "DESCRIPCIÓN", "EQUIPO", "NOMBRE"];
+      const keysDescrip = ["DESCRIPCION", "DESCRIPCIÓN", "EQUIPO", "NOMBRE", "DESCRIPCION CORTA"];
 
       const codigo = getValorCampo(item, keysCodigo) || "SIN CÓDIGO";
       const descripcion = getValorCampo(item, keysDescrip) || "Sin Descripción";
@@ -459,14 +458,13 @@
       tableTecnica.innerHTML = "";
       tableElectrica.innerHTML = "";
 
-      const kwGeneral = ["CÓDIGO", "CODIGO", "DESCRIPCION", "DESCRIPCIÓN", "EQUIPO", "PLANTA", "UBICACION", "UBICACIÓN", "ESTADO", "SITIO", "AREA", "ÁREA", "LINEA", "LÍNEA", "DEPARTAMENTO"];
+      const kwGeneral = ["CÓDIGO", "CODIGO", "DESCRIPCION", "DESCRIPCIÓN", "EQUIPO", "PLANTA", "UBICACION", "UBICACIÓN", "ESTADO", "SITIO", "AREA", "ÁREA", "LINEA", "LÍNEA"];
       const kwElectrica = ["VOLTAJE", "VOLTS", "AMPERAJE", "AMP", "POTENCIA", "KW", "KVA", "HP", "CONEXION", "CONEXIÓN", "TABLERO", "ALIMENTACION", "ALIMENTACIÓN", "AIRE", "AGUA", "PRESION", "PRESIÓN", "GAS"];
 
       Object.keys(item).forEach(key => {
         const keyUpper = key.toUpperCase();
         let val = item[key] !== undefined && item[key] !== null ? item[key].toString().trim() : "";
 
-        // SOLO SE MUESTRAN LOS CAMPOS QUE TENGAN INFORMACIÓN VÁLIDA
         if (esValorValido(val)) {
           const rowHtml = `<tr><td class="label-col">${key}</td><td class="value-col">${val}</td></tr>`;
 
