@@ -1,520 +1,324 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Caracterización de Equipos — Carvajal Empaques</title>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Librería para lectura de Excel / CSV -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-  <style>
-    :root {
-      --carvajal-naranja: #EB6608;
-      --carvajal-verde: #00A859;
-      --carvajal-violeta: #3A1B57;
-      --bg-body: #F4F6F8;
-      --card-bg: #FFFFFF;
-      --texto-principal: #0F172A;
-      --texto-secundario: #475569;
-      --borde: #E2E8F0;
-      --radius: 6px;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg-body); color: var(--texto-principal); padding-bottom: 40px; }
-
-    header {
-      background: var(--carvajal-violeta);
-      color: #ffffff;
-      padding: 16px 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 4px solid var(--carvajal-naranja);
-    }
-    .header-info h1 { font-family: 'Oswald', sans-serif; font-size: 1.6rem; text-transform: uppercase; letter-spacing: 0.5px; color: #ffffff; }
-    .header-info p { font-size: 0.8rem; color: #CBD5E1; }
-    .logo-container img { height: 40px; width: auto; display: block; }
-
-    .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
-
-    /* INDICADOR DE CARGA DESDE ONEDRIVE */
-    .loading-banner {
-      background: #E0F2FE;
-      color: #0369A1;
-      border: 1px solid #BAE6FD;
-      padding: 10px 16px;
-      border-radius: var(--radius);
-      margin-bottom: 15px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    /* KPIS */
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
-    .kpi-card { 
-      background: var(--card-bg); 
-      padding: 10px 15px; 
-      border-radius: var(--radius); 
-      border: 1px solid var(--borde); 
-      text-align: center; 
-      border-top: 3px solid var(--carvajal-violeta); 
-    }
-    .kpi-num { font-family: 'Oswald', sans-serif; font-size: 1.5rem; color: var(--carvajal-violeta); font-weight: 700; }
-    .kpi-label { font-size: 0.7rem; text-transform: uppercase; color: var(--texto-secundario); font-weight: 600; margin-top: 2px; }
-
-    /* CONTROLES / FILTROS */
-    .controls-panel { background: var(--card-bg); padding: 12px 18px; border-radius: var(--radius); border: 1px solid var(--borde); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 20px; }
-    .search-input { flex: 1; min-width: 220px; padding: 8px 12px; border: 1px solid var(--borde); border-radius: 4px; font-size: 0.85rem; outline: none; }
-    .search-input:focus { border-color: var(--carvajal-violeta); }
-    .filter-select { padding: 8px 10px; border: 1px solid var(--borde); border-radius: 4px; font-size: 0.82rem; background-color: #fff; color: var(--texto-principal); outline: none; }
-    .btn-clear { padding: 8px 14px; background: #E2E8F0; color: #475569; border: none; border-radius: 4px; font-weight: 600; font-size: 0.82rem; cursor: pointer; }
-    .btn-clear:hover { background: #CBD5E1; }
-
-    /* GRID EQUIPOS */
-    .equipos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-    .equipo-card { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--borde); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.15s, box-shadow 0.15s; cursor: pointer; }
-    .equipo-card:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.08); border-color: var(--carvajal-violeta); }
-    
-    .card-header-tag { background: var(--carvajal-violeta); color: #fff; padding: 8px 12px; font-family: 'Oswald', sans-serif; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--carvajal-naranja); }
-    .card-header-tag .codigo { font-size: 1rem; color: #ffffff; }
-    .card-header-tag .tipo { font-size: 0.72rem; text-transform: uppercase; color: #E2E8F0; font-family: 'IBM Plex Sans', sans-serif; font-weight: 500; }
-
-    .img-container { height: 160px; background: #FAFCFF; display: flex; align-items: center; justify-content: center; overflow: hidden; border-bottom: 1px solid var(--borde); }
-    .img-container img { width: 100%; height: 100%; object-fit: cover; }
-    .no-foto { font-size: 0.75rem; color: #94A3B8; font-style: italic; }
-
-    .card-body { padding: 12px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-    .equipo-nombre { font-size: 0.88rem; font-weight: 700; margin-bottom: 10px; color: var(--texto-principal); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .specs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 0.75rem; color: var(--texto-secundario); margin-bottom: 10px; }
-    .specs-item span { display: block; color: var(--texto-principal); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-    .badges-container { display: flex; flex-wrap: wrap; gap: 4px; }
-    .badge { font-size: 0.65rem; font-weight: 700; padding: 3px 6px; border-radius: 3px; text-transform: uppercase; }
-    .badge-planta { background: #E0F2FE; color: #0369A1; }
-    .badge-estado { background: #DCFCE7; color: #15803D; border: 1px solid #86EFAC; }
-    .badge-estado-inactivo { background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5; }
-    .badge-voltaje { background: #FEF3C7; color: #B45309; }
-
-    /* MODAL */
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(15, 23, 42, 0.65);
-      backdrop-filter: blur(3px);
-      display: flex; justify-content: center; align-items: center;
-      z-index: 1000; opacity: 0; visibility: hidden;
-      transition: opacity 0.2s ease, visibility 0.2s ease;
-      padding: 15px;
-    }
-    .modal-overlay.active { opacity: 1; visibility: visible; }
-
-    .modal-content {
-      background: #ffffff;
-      width: 100%; max-width: 920px; max-height: 90vh;
-      border-radius: 8px; overflow: hidden;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-      display: flex; flex-direction: column;
-    }
-
-    .modal-header {
-      background: var(--carvajal-violeta);
-      color: #ffffff;
-      padding: 14px 20px;
-      display: flex; justify-content: space-between; align-items: center;
-      border-bottom: 3px solid var(--carvajal-naranja);
-    }
-    .modal-header-titles h2 { font-family: 'Oswald', sans-serif; font-size: 1.4rem; text-transform: uppercase; color: #ffffff; }
-    .modal-header-titles p { font-size: 0.85rem; color: #CBD5E1; font-weight: 400; }
-
-    .modal-close {
-      background: rgba(255,255,255,0.1); border: none; color: #ffffff;
-      width: 32px; height: 32px; border-radius: 50%; font-size: 1.2rem;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      transition: background 0.2s;
-    }
-    .modal-close:hover { background: var(--carvajal-verde); }
-
-    .modal-body { padding: 20px; overflow-y: auto; }
-
-    .modal-photos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-    @media (max-width: 600px) { .modal-photos-grid { grid-template-columns: 1fr; } }
-
-    .photo-card { background: #FFFFFF; border: 1px solid var(--borde); border-radius: 6px; overflow: hidden; }
-    .photo-card img { width: 100%; height: 220px; object-fit: cover; display: block; }
-    .photo-caption { font-size: 0.72rem; font-weight: 700; background: #FFFFFF; color: var(--texto-secundario); padding: 6px; text-transform: uppercase; border-top: 1px solid var(--borde); text-align: center; }
-
-    .video-full-container { width: 100%; margin-bottom: 20px; }
-    .video-card { background: #000; border-radius: 6px; overflow: hidden; border: 1px solid var(--borde); }
-    .video-card video { width: 100%; max-height: 380px; display: block; }
-
-    .modal-section { margin-bottom: 20px; }
-    .section-header { 
-      font-family: 'Oswald', sans-serif; font-size: 1.05rem; 
-      color: var(--carvajal-violeta); text-transform: uppercase; 
-      border-bottom: 2px solid var(--carvajal-naranja); padding-bottom: 4px; margin-bottom: 10px;
-    }
-
-    .tech-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; background-color: #FFFFFF; }
-    .tech-table tr { border-bottom: 1px solid var(--borde); background-color: #FFFFFF !important; }
-    .tech-table td.label-col { width: 35%; padding: 8px 12px; font-weight: 700; color: var(--texto-secundario); text-transform: uppercase; font-size: 0.78rem; border-right: 1px solid var(--borde); }
-    .tech-table td.value-col { width: 65%; padding: 8px 12px; font-weight: 600; color: var(--texto-principal); word-break: break-word; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caracterización de Equipos — Carvajal Empaques</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .bg-carvajal { background-color: #38124d; }
+        .border-carvajal { border-color: #f36f21; }
+        .text-carvajal { color: #38124d; }
+    </style>
 </head>
-<body>
+<body class="bg-slate-50 min-h-screen text-slate-800">
 
-  <header>
-    <div class="header-info">
-      <h1>Caracterización de Equipos</h1>
-      <p>Mantenimiento & Proyectos — Carvajal Empaques</p>
-    </div>
-    <div class="logo-container">
-      <img src="logo/logo.png" alt="Carvajal Empaques" onerror="this.style.display='none'">
-    </div>
-  </header>
-
-  <div class="container">
-
-    <div class="loading-banner" id="banner-carga">
-      <span>☁️ Cargando base de datos en tiempo real desde OneDrive de Carvajal...</span>
-    </div>
-
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-num" id="kpi-total">0</div>
-        <div class="kpi-label">Equipos Registrados</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-num" id="kpi-activos">0</div>
-        <div class="kpi-label">Estado Activo</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-num" id="kpi-tipos">0</div>
-        <div class="kpi-label">Tipos de Máquina</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-num" id="kpi-fabricantes">0</div>
-        <div class="kpi-label">Fabricantes</div>
-      </div>
-    </div>
-
-    <div class="controls-panel">
-      <input type="text" id="input-busqueda" class="search-input" placeholder="Buscar por código, descripción, modelo...">
-      
-      <select id="filtro-planta" class="filter-select"><option value="">Planta — todas</option></select>
-      <select id="filtro-tipo" class="filter-select"><option value="">Tipo — todos</option></select>
-      <select id="filtro-estado" class="filter-select"><option value="">Estado — todos</option></select>
-      <select id="filtro-fabricante" class="filter-select"><option value="">Fabricante — todos</option></select>
-      
-      <button class="btn-clear" id="btn-limpiar">Limpiar filtros</button>
-    </div>
-
-    <div class="equipos-grid" id="galeria-equipos"></div>
-
-  </div>
-
-  <!-- MODAL -->
-  <div class="modal-overlay" id="modal-detalle" onclick="cerrarModalAfuera(event)">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div class="modal-header-titles">
-          <h2 id="modal-codigo">CÓDIGO</h2>
-          <p id="modal-nombre">Descripción del equipo</p>
+    <!-- Header / Navbar -->
+    <header class="bg-carvajal text-white shadow-lg border-b-4 border-carvajal sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-gears text-2xl text-orange-400"></i>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold tracking-tight">CARACTERIZACIÓN DE EQUIPOS</h1>
+                    <p class="text-xs text-slate-300">Mantenimiento & Proyectos — Carvajal Empaques</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 bg-white/10 px-3 py-1.5 rounded-lg border border-white/20 text-xs">
+                <i class="fa-solid fa-file-csv text-green-400 text-base"></i>
+                <span id="dataStatus">Cargando base de datos...</span>
+            </div>
         </div>
-        <button class="modal-close" onclick="cerrarModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        
-        <div class="modal-photos-grid">
-          <div class="photo-card">
-            <img id="modal-img-equipo" src="" alt="Fotografía del Equipo">
-            <div class="photo-caption">Fotografía General</div>
-          </div>
-          <div class="photo-card">
-            <img id="modal-img-placa" src="" alt="Placa Técnica">
-            <div class="photo-caption">Placa Técnica / Seriales</div>
-          </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 space-y-6">
+
+        <!-- KPIs / Tarjetas de Resumen -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-xs font-semibold text-slate-500 uppercase">Equipos Registrados</p>
+                <h3 id="statTotal" class="text-2xl font-extrabold text-carvajal mt-1">0</h3>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-xs font-semibold text-slate-500 uppercase">Estado Activo</p>
+                <h3 id="statActivos" class="text-2xl font-extrabold text-emerald-600 mt-1">0</h3>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-xs font-semibold text-slate-500 uppercase">Tipos de Máquina</p>
+                <h3 id="statTipos" class="text-2xl font-extrabold text-carvajal mt-1">0</h3>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-xs font-semibold text-slate-500 uppercase">Fabricantes</p>
+                <h3 id="statFabricantes" class="text-2xl font-extrabold text-carvajal mt-1">0</h3>
+            </div>
         </div>
 
-        <div class="video-full-container" id="modal-container-video" style="display: none;">
-          <div class="video-card">
-            <video id="modal-video-equipo" controls preload="metadata">
-              <source id="modal-video-src" src="" type="video/mp4">
-            </video>
-          </div>
+        <!-- Filtros de Búsqueda -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                <div class="lg:col-span-2 relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
+                    <input type="text" id="searchInput" placeholder="Buscar por código, descripción, modelo..." 
+                           class="w-pl-10 pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm w-full focus:ring-2 focus:ring-purple-900 focus:outline-none">
+                </div>
+                <div>
+                    <select id="filterPlanta" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900 focus:outline-none">
+                        <option value="">Planta — todas</option>
+                    </select>
+                </div>
+                <div>
+                    <select id="filterTipo" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900 focus:outline-none">
+                        <option value="">Tipo — todos</option>
+                    </select>
+                </div>
+                <div>
+                    <select id="filterEstado" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900 focus:outline-none">
+                        <option value="">Estado — todos</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-between items-center text-xs text-slate-500 pt-2 border-t border-slate-100">
+                <span id="resultsCount">Mostrando 0 resultados</span>
+                <button id="btnClearFilters" class="text-purple-900 hover:underline font-medium">Limpiar filtros</button>
+            </div>
         </div>
 
-        <div class="modal-section" id="modal-sec-general">
-          <div class="section-header">Información General</div>
-          <table class="tech-table"><tbody id="modal-table-general"></tbody></table>
+        <!-- Tabla de Resultados -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-600">
+                    <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200 uppercase text-xs">
+                        <tr>
+                            <th class="p-3">Código</th>
+                            <th class="p-3">Descripción</th>
+                            <th class="p-3">Ubicación / Planta</th>
+                            <th class="p-3">Tipo de Máquina</th>
+                            <th class="p-3">Fabricante</th>
+                            <th class="p-3">Modelo</th>
+                            <th class="p-3">Estado</th>
+                            <th class="p-3 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-200">
+                        <!-- Carga dinámica -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="noData" class="hidden p-8 text-center text-slate-500">
+                <i class="fa-solid fa-folder-open text-4xl mb-2 text-slate-300"></i>
+                <p>No se encontraron registros que coincidan con los filtros.</p>
+            </div>
         </div>
+    </main>
 
-        <div class="modal-section" id="modal-sec-tecnica">
-          <div class="section-header">Especificaciones Técnicas</div>
-          <table class="tech-table"><tbody id="modal-table-tecnica"></tbody></table>
+    <!-- Modal Detalle del Equipo -->
+    <div id="detailModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-carvajal text-white rounded-t-2xl">
+                <div>
+                    <h3 id="modalTitle" class="text-lg font-bold">Detalle del Equipo</h3>
+                    <p id="modalSubtitle" class="text-xs text-orange-300"></p>
+                </div>
+                <button onclick="closeModal()" class="text-white hover:text-orange-400 text-xl font-bold px-2">&times;</button>
+            </div>
+            <div id="modalContent" class="p-6 space-y-4">
+                <!-- Se llena dinámicamente -->
+            </div>
         </div>
-
-        <div class="modal-section" id="modal-sec-electrica">
-          <div class="section-header">Información Eléctrica</div>
-          <table class="tech-table"><tbody id="modal-table-electrica"></tbody></table>
-        </div>
-
-      </div>
     </div>
-  </div>
 
-  <script>
-    // URL de descarga directa obtenida desde tu OneDrive de Carvajal
-    const URL_EXCEL_ONEDRIVE = "https://carvajal-my.sharepoint.com/:x:/p/luis_baronasegura/IQBeMzlil4P3SLcyf5uUJDH3ARsZHHIA9Vy0n1MYOpSxl9Y?e=yxcd9X&download=1";
+    <script>
+        let rawData = [];
 
-    let datosEquipos = [];
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchCSVData();
 
-    function esValorValido(val) {
-      if (val === undefined || val === null) return false;
-      const v = val.toString().trim().toUpperCase();
-      if (v === "" || v === "N/A" || v === "NO APLICA" || v === "SIN DATOS" || v === "NULL" || v === "UNDEFINED") return false;
-      if (/^[-_\s]+$/.test(v)) return false;
-      return true;
-    }
-
-    function getValorCampo(item, posiblesNombres) {
-      for (let nombre of posiblesNombres) {
-        const claveEncontrada = Object.keys(item).find(k => k.trim().toLowerCase() === nombre.toLowerCase());
-        if (claveEncontrada && item[claveEncontrada] !== undefined && item[claveEncontrada] !== null) {
-          const val = item[claveEncontrada].toString().trim();
-          if (esValorValido(val)) return val;
-        }
-      }
-      return "";
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      cargarExcelDesdeOneDrive();
-
-      document.getElementById("input-busqueda").addEventListener("input", renderizarApp);
-      document.getElementById("filtro-planta").addEventListener("change", renderizarApp);
-      document.getElementById("filtro-tipo").addEventListener("change", renderizarApp);
-      document.getElementById("filtro-estado").addEventListener("change", renderizarApp);
-      document.getElementById("filtro-fabricante").addEventListener("change", renderizarApp);
-      document.getElementById("btn-limpiar").addEventListener("click", () => {
-        document.getElementById("input-busqueda").value = "";
-        document.getElementById("filtro-planta").value = "";
-        document.getElementById("filtro-tipo").value = "";
-        document.getElementById("filtro-estado").value = "";
-        document.getElementById("filtro-fabricante").value = "";
-        renderizarApp();
-      });
-
-      document.addEventListener('keydown', (e) => { if (e.key === "Escape") cerrarModal(); });
-    });
-
-    function cargarExcelDesdeOneDrive() {
-      fetch(URL_EXCEL_ONEDRIVE)
-        .then(res => {
-          if (!res.ok) throw new Error("No se pudo obtener la base de datos de OneDrive");
-          return res.arrayBuffer();
-        })
-        .then(buffer => {
-          const workbook = XLSX.read(buffer, { type: 'array' });
-          datosEquipos = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: "" });
-          
-          document.getElementById("banner-carga").style.display = "none";
-          poblarFiltros();
-          renderizarApp();
-        })
-        .catch(err => {
-          console.warn("Falló descarga de OneDrive, intentando archivo local CARACTERIZACIÓN.csv / .xlsx...", err);
-          document.getElementById("banner-carga").style.backgroundColor = "#FEF2F2";
-          document.getElementById("banner-carga").style.color = "#991B1B";
-          document.getElementById("banner-carga").innerHTML = "⚠️ Cargando datos locales de respaldo...";
-          
-          fetch("CARACTERIZACIÓN.csv")
-            .then(res => res.arrayBuffer())
-            .then(buffer => {
-              const workbook = XLSX.read(buffer, { type: 'array' });
-              datosEquipos = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: "" });
-              document.getElementById("banner-carga").style.display = "none";
-              poblarFiltros();
-              renderizarApp();
-            });
+            document.getElementById('searchInput').addEventListener('input', applyFilters);
+            document.getElementById('filterPlanta').addEventListener('change', applyFilters);
+            document.getElementById('filterTipo').addEventListener('change', applyFilters);
+            document.getElementById('filterEstado').addEventListener('change', applyFilters);
+            document.getElementById('btnClearFilters').addEventListener('click', clearFilters);
         });
-    }
 
-    function poblarFiltros() {
-      const extraerUnicos = (nombres) => [...new Set(datosEquipos.map(e => getValorCampo(e, nombres)).filter(esValorValido))].sort();
-      const llenarSelect = (id, valores) => {
-        const select = document.getElementById(id);
-        select.innerHTML = `<option value="">${select.options[0].text}</option>`;
-        valores.forEach(v => { const opt = document.createElement("option"); opt.value = v; opt.textContent = v; select.appendChild(opt); });
-      };
-
-      llenarSelect("filtro-planta", extraerUnicos(["PLANTA", "UBICACION", "UBICACIÓN", "SITIO"]));
-      llenarSelect("filtro-tipo", extraerUnicos(["TIPO DE MAQUINA", "TIPO MAQUINA", "TIPO_MAQUINA", "TIPO", "CATEGORIA"]));
-      llenarSelect("filtro-estado", extraerUnicos(["ESTADO", "ESTADO_EQUIPO", "STATUS"]));
-      llenarSelect("filtro-fabricante", extraerUnicos(["FABRICANTE", "MARCA", "PROVEEDOR"]));
-    }
-
-    function probarSiguienteImagen(imgElement, codigoOriginal) {
-      const intentos = [`fotos/${codigoOriginal}.png`, `fotos/${codigoOriginal}.jpg`, `fotos/PLACA${codigoOriginal}.png`, `fotos/PLACA${codigoOriginal}.jpg`];
-      let idxActual = parseInt(imgElement.getAttribute("data-intent-idx") || "0", 10) + 1;
-      if (idxActual < intentos.length) {
-        imgElement.setAttribute("data-intent-idx", idxActual);
-        imgElement.src = intentos[idxActual];
-      } else {
-        imgElement.parentNode.innerHTML = `<span class="no-foto">Sin imagen</span>`;
-      }
-    }
-
-    function renderizarApp() {
-      const q = document.getElementById("input-busqueda").value.toLowerCase();
-      const fPlanta = document.getElementById("filtro-planta").value;
-      const fTipo = document.getElementById("filtro-tipo").value;
-      const fEstado = document.getElementById("filtro-estado").value;
-      const fFabricante = document.getElementById("filtro-fabricante").value;
-
-      const filtrados = datosEquipos.filter(item => {
-        const codigo = getValorCampo(item, ["CÓDIGO", "CODIGO", "COD_ORACLE", "CODIGO ORACLE"]).toLowerCase();
-        const descrip = getValorCampo(item, ["DESCRIPCION", "DESCRIPCIÓN", "EQUIPO", "NOMBRE"]).toLowerCase();
-        const modelo = getValorCampo(item, ["MODELO"]).toLowerCase();
-        const planta = getValorCampo(item, ["PLANTA", "UBICACION", "UBICACIÓN", "SITIO"]);
-        const tipo = getValorCampo(item, ["TIPO DE MAQUINA", "TIPO MAQUINA", "TIPO_MAQUINA", "TIPO", "CATEGORIA"]);
-        const estado = getValorCampo(item, ["ESTADO", "ESTADO_EQUIPO", "STATUS"]);
-        const fab = getValorCampo(item, ["FABRICANTE", "MARCA", "PROVEEDOR"]);
-
-        return (!q || codigo.includes(q) || descrip.includes(q) || modelo.includes(q)) &&
-               (!fPlanta || planta === fPlanta) && (!fTipo || tipo === fTipo) &&
-               (!fEstado || estado === fEstado) && (!fFabricante || fab === fFabricante);
-      });
-
-      document.getElementById("kpi-total").textContent = filtrados.length;
-      document.getElementById("kpi-activos").textContent = filtrados.filter(e => ["ACTIVO", "OPERATIVO"].includes(getValorCampo(e, ["ESTADO", "ESTADO_EQUIPO", "STATUS"]).toUpperCase())).length;
-      document.getElementById("kpi-tipos").textContent = new Set(filtrados.map(e => getValorCampo(e, ["TIPO DE MAQUINA", "TIPO MAQUINA", "TIPO"])).filter(esValorValido)).size;
-      document.getElementById("kpi-fabricantes").textContent = new Set(filtrados.map(e => getValorCampo(e, ["FABRICANTE", "MARCA"])).filter(esValorValido)).size;
-
-      const galeria = document.getElementById("galeria-equipos");
-      galeria.innerHTML = "";
-
-      filtrados.forEach((item) => {
-        const codigo = getValorCampo(item, ["CÓDIGO", "CODIGO", "COD_ORACLE", "CODIGO ORACLE"]) || "N/A";
-        const descripcion = getValorCampo(item, ["DESCRIPCION", "DESCRIPCIÓN", "EQUIPO", "NOMBRE"]) || "Sin descripción";
-        const tipo = getValorCampo(item, ["TIPO DE MAQUINA", "TIPO MAQUINA", "TIPO"]) || "General";
-        const fab = getValorCampo(item, ["FABRICANTE", "MARCA"]) || "N/R";
-        const mod = getValorCampo(item, ["MODELO"]) || "N/R";
-        const planta = getValorCampo(item, ["PLANTA", "UBICACION", "SITIO"]);
-        const estado = getValorCampo(item, ["ESTADO", "STATUS"]);
-        const voltaje = getValorCampo(item, ["VOLTAJE", "VOLTS"]);
-        const esInactivo = estado.toUpperCase().includes("INACTIVO");
-
-        const card = document.createElement("div");
-        card.className = "equipo-card";
-        card.onclick = () => abrirModal(item);
-        card.innerHTML = `
-          <div class="card-header-tag">
-            <span class="codigo">${codigo}</span>
-            <span class="tipo">${tipo}</span>
-          </div>
-          <div class="img-container">
-            <img src="fotos/${codigo}.png" alt="${codigo}" data-intent-idx="0" onerror="probarSiguienteImagen(this, '${codigo}')">
-          </div>
-          <div class="card-body">
-            <div class="equipo-nombre" title="${descripcion}">${descripcion}</div>
-            <div class="specs-grid">
-              <div class="specs-item">Fabricante <span>${fab}</span></div>
-              <div class="specs-item">Modelo <span>${mod}</span></div>
-            </div>
-            <div class="badges-container">
-              ${planta ? `<span class="badge badge-planta">${planta}</span>` : ''}
-              ${estado ? `<span class="badge ${esInactivo ? 'badge-estado-inactivo' : 'badge-estado'}">${estado}</span>` : ''}
-              ${voltaje ? `<span class="badge badge-voltaje">${voltaje}</span>` : ''}
-            </div>
-          </div>
-        `;
-        galeria.appendChild(card);
-      });
-    }
-
-    function abrirModal(item) {
-      const codigo = getValorCampo(item, ["CÓDIGO", "CODIGO", "COD_ORACLE", "CODIGO ORACLE"]) || "SIN CÓDIGO";
-      const descripcion = getValorCampo(item, ["DESCRIPCION", "DESCRIPCIÓN", "EQUIPO", "NOMBRE"]) || "Sin Descripción";
-
-      document.getElementById("modal-codigo").textContent = codigo;
-      document.getElementById("modal-nombre").textContent = descripcion;
-
-      const imgEquipo = document.getElementById("modal-img-equipo");
-      const imgPlaca = document.getElementById("modal-img-placa");
-
-      imgEquipo.src = `fotos/${codigo}.png`;
-      imgEquipo.onerror = function() {
-        if (this.src.endsWith('.png')) this.src = `fotos/${codigo}.jpg`;
-        else this.src = 'https://via.placeholder.com/450x250/ffffff/94a3b8?text=SIN+FOTO+EQUIPO';
-      };
-
-      imgPlaca.src = `fotos/PLACA${codigo}.png`;
-      imgPlaca.onerror = function() {
-        if (this.src.endsWith('.png')) this.src = `fotos/PLACA${codigo}.jpg`;
-        else this.src = 'https://via.placeholder.com/450x250/ffffff/94a3b8?text=SIN+PLACA+TECNICA';
-      };
-
-      const containerVideo = document.getElementById("modal-container-video");
-      const videoElem = document.getElementById("modal-video-equipo");
-      const videoSrc = document.getElementById("modal-video-src");
-
-      videoSrc.src = `videos/${codigo}.mp4`;
-      videoElem.load();
-      containerVideo.style.display = "block";
-      videoElem.onerror = function() { containerVideo.style.display = "none"; };
-
-      const tableGeneral = document.getElementById("modal-table-general");
-      const tableTecnica = document.getElementById("modal-table-tecnica");
-      const tableElectrica = document.getElementById("modal-table-electrica");
-
-      tableGeneral.innerHTML = "";
-      tableTecnica.innerHTML = "";
-      tableElectrica.innerHTML = "";
-
-      const kwGeneral = ["CÓDIGO", "CODIGO", "DESCRIPCION", "DESCRIPCIÓN", "EQUIPO", "PLANTA", "UBICACION", "UBICACIÓN", "ESTADO", "SITIO", "AREA", "ÁREA", "LINEA", "LÍNEA"];
-      const kwElectrica = ["VOLTAJE", "VOLTS", "AMPERAJE", "AMP", "POTENCIA", "KW", "KVA", "HP", "CONEXION", "CONEXIÓN", "TABLERO", "ALIMENTACION", "ALIMENTACIÓN", "AIRE", "AGUA", "PRESION", "PRESIÓN", "GAS"];
-
-      Object.keys(item).forEach(key => {
-        const keyUpper = key.toUpperCase();
-        let val = item[key] !== undefined && item[key] !== null ? item[key].toString().trim() : "";
-
-        if (esValorValido(val)) {
-          const rowHtml = `<tr><td class="label-col">${key}</td><td class="value-col">${val}</td></tr>`;
-
-          if (kwElectrica.some(kw => keyUpper.includes(kw))) {
-            tableElectrica.innerHTML += rowHtml;
-          } else if (kwGeneral.some(kw => keyUpper.includes(kw))) {
-            tableGeneral.innerHTML += rowHtml;
-          } else {
-            tableTecnica.innerHTML += rowHtml;
-          }
+        async function fetchCSVData() {
+            const statusEl = document.getElementById('dataStatus');
+            try {
+                const response = await fetch('caracterizacion.csv?v=' + new Date().getTime());
+                if (!response.ok) throw new Error('No se encontró el archivo caracterizacion.csv');
+                
+                const text = await response.text();
+                rawData = parseCSV(text);
+                
+                statusEl.textContent = `${rawData.length} registros cargados`;
+                statusEl.parentElement.classList.replace('text-white', 'text-emerald-300');
+                
+                populateFilters();
+                updateKPIs(rawData);
+                renderTable(rawData);
+            } catch (err) {
+                console.error(err);
+                statusEl.textContent = 'Error al cargar caracterizacion.csv';
+                statusEl.parentElement.classList.replace('text-white', 'text-rose-300');
+            }
         }
-      });
 
-      document.getElementById("modal-sec-general").style.display = tableGeneral.children.length ? "block" : "none";
-      document.getElementById("modal-sec-tecnica").style.display = tableTecnica.children.length ? "block" : "none";
-      document.getElementById("modal-sec-electrica").style.display = tableElectrica.children.length ? "block" : "none";
+        function parseCSV(text) {
+            const lines = text.split(/\r\n|\n/).filter(line => line.trim() !== '');
+            if (lines.length < 2) return [];
 
-      document.getElementById("modal-detalle").classList.add("active");
-    }
+            const delimiter = lines[0].includes(';') ? ';' : ',';
+            const headers = lines[0].split(delimiter).map(h => h.replace(/^["']|["']$/g, '').trim());
 
-    function cerrarModal() {
-      const videoElem = document.getElementById("modal-video-equipo");
-      if (videoElem) videoElem.pause();
-      document.getElementById("modal-detalle").classList.remove("active");
-    }
+            return lines.slice(1).map(line => {
+                const values = line.split(delimiter).map(v => v.replace(/^["']|["']$/g, '').trim());
+                let row = {};
+                headers.forEach((h, i) => {
+                    row[h] = values[i] || '';
+                });
+                return row;
+            });
+        }
 
-    function cerrarModalAfuera(e) {
-      if (e.target.id === "modal-detalle") cerrarModal();
-    }
-  </script>
+        function populateFilters() {
+            const plantas = [...new Set(rawData.map(r => r['UBICACIÓN / PLANTA'] || r['PLANTA']).filter(Boolean))].sort();
+            const tipos = [...new Set(rawData.map(r => r['TIPO DE MÁQUINA'] || r['TIPO DE MAQUINA']).filter(Boolean))].sort();
+            const estados = [...new Set(rawData.map(r => r['ESTADO'] || r['ESTADO ACTUAL']).filter(Boolean))].sort();
+
+            fillSelect('filterPlanta', plantas);
+            fillSelect('filterTipo', tipos);
+            fillSelect('filterEstado', estados);
+        }
+
+        function fillSelect(id, items) {
+            const select = document.getElementById(id);
+            const defaultText = select.options[0].text;
+            select.innerHTML = `<option value="">${defaultText}</option>`;
+            items.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item;
+                opt.textContent = item;
+                select.appendChild(opt);
+            });
+        }
+
+        function applyFilters() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const planta = document.getElementById('filterPlanta').value;
+            const tipo = document.getElementById('filterTipo').value;
+            const estado = document.getElementById('filterEstado').value;
+
+            const filtered = rawData.filter(item => {
+                const textMatch = !search || Object.values(item).some(val => String(val).toLowerCase().includes(search));
+                const plantaMatch = !planta || (item['UBICACIÓN / PLANTA'] || item['PLANTA']) === planta;
+                const tipoMatch = !tipo || (item['TIPO DE MÁQUINA'] || item['TIPO DE MAQUINA']) === tipo;
+                const estadoMatch = !estado || (item['ESTADO'] || item['ESTADO ACTUAL']) === estado;
+
+                return textMatch && plantaMatch && tipoMatch && estadoMatch;
+            });
+
+            renderTable(filtered);
+            updateKPIs(filtered);
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterPlanta').value = '';
+            document.getElementById('filterTipo').value = '';
+            document.getElementById('filterEstado').value = '';
+            applyFilters();
+        }
+
+        function updateKPIs(data) {
+            document.getElementById('statTotal').textContent = data.length;
+            
+            const activos = data.filter(d => (d['ESTADO'] || d['ESTADO ACTUAL'] || '').toLowerCase().includes('activo')).length;
+            document.getElementById('statActivos').textContent = activos;
+
+            const tipos = new Set(data.map(d => d['TIPO DE MÁQUINA'] || d['TIPO DE MAQUINA']).filter(Boolean)).size;
+            document.getElementById('statTipos').textContent = tipos;
+
+            const marcas = new Set(data.map(d => d['MARCA / FABRICANTE'] || d['FABRICANTE']).filter(Boolean)).size;
+            document.getElementById('statFabricantes').textContent = marcas;
+
+            document.getElementById('resultsCount').textContent = `Mostrando ${data.length} resultados`;
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            const noData = document.getElementById('noData');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                noData.classList.remove('hidden');
+                return;
+            }
+            noData.classList.add('hidden');
+
+            data.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition-colors';
+
+                const codigo = row['CÓDIGO'] || row['CODIGO'] || 'N/A';
+                const desc = row['DESCRIPCIÓN'] || row['DESCRIPCION'] || 'N/A';
+                const planta = row['UBICACIÓN / PLANTA'] || row['PLANTA'] || 'N/A';
+                const tipo = row['TIPO DE MÁQUINA'] || row['TIPO DE MAQUINA'] || 'N/A';
+                const fabricante = row['MARCA / FABRICANTE'] || row['FABRICANTE'] || 'N/A';
+                const modelo = row['MODELO'] || 'N/A';
+                const estado = row['ESTADO'] || row['ESTADO ACTUAL'] || 'N/A';
+
+                const isActivo = estado.toLowerCase().includes('activo');
+                const badgeClass = isActivo ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800';
+
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-carvajal">${codigo}</td>
+                    <td class="p-3 font-medium text-slate-900">${desc}</td>
+                    <td class="p-3">${planta}</td>
+                    <td class="p-3">${tipo}</td>
+                    <td class="p-3">${fabricante}</td>
+                    <td class="p-3">${modelo}</td>
+                    <td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-semibold ${badgeClass}">${estado}</span></td>
+                    <td class="p-3 text-center">
+                        <button onclick="openModal(${index})" class="px-3 py-1 bg-slate-100 hover:bg-purple-900 hover:text-white rounded text-xs font-medium transition-colors">
+                            Ver ficha
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openModal(index) {
+            const row = rawData[index];
+            const modal = document.getElementById('detailModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalSubtitle = document.getElementById('modalSubtitle');
+            const modalContent = document.getElementById('modalContent');
+
+            modalTitle.textContent = row['DESCRIPCIÓN'] || row['DESCRIPCION'] || 'Ficha Técnica';
+            modalSubtitle.textContent = `Código: ${row['CÓDIGO'] || row['CODIGO'] || 'N/A'}`;
+
+            let gridHTML = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">';
+            
+            Object.keys(row).forEach(key => {
+                gridHTML += `
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        <p class="text-xs font-semibold text-slate-500 uppercase">${key}</p>
+                        <p class="font-medium text-slate-800 mt-0.5">${row[key] || '—'}</p>
+                    </div>
+                `;
+            });
+
+            gridHTML += '</div>';
+            modalContent.innerHTML = gridHTML;
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+        }
+    </script>
 </body>
 </html>
