@@ -42,7 +42,6 @@
 
     .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
 
-    /* KPIS UNIFICADOS EN UN SOLO COLOR SOBRIO */
     .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
     .kpi-card { 
       background: var(--card-bg); 
@@ -55,7 +54,6 @@
     .kpi-num { font-family: 'Oswald', sans-serif; font-size: 1.5rem; color: var(--carvajal-violeta); font-weight: 700; }
     .kpi-label { font-size: 0.7rem; text-transform: uppercase; color: var(--texto-secundario); font-weight: 600; margin-top: 2px; }
 
-    /* CONTROLES / FILTROS */
     .controls-panel { background: var(--card-bg); padding: 12px 18px; border-radius: var(--radius); border: 1px solid var(--borde); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 20px; }
     .search-input { flex: 1; min-width: 220px; padding: 8px 12px; border: 1px solid var(--borde); border-radius: 4px; font-size: 0.85rem; outline: none; }
     .search-input:focus { border-color: var(--carvajal-violeta); }
@@ -63,7 +61,6 @@
     .btn-clear { padding: 8px 14px; background: #E2E8F0; color: #475569; border: none; border-radius: 4px; font-weight: 600; font-size: 0.82rem; cursor: pointer; }
     .btn-clear:hover { background: #CBD5E1; }
 
-    /* GRID EQUIPOS */
     .equipos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
     .equipo-card { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--borde); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.15s, box-shadow 0.15s; cursor: pointer; }
     .equipo-card:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.08); border-color: var(--carvajal-violeta); }
@@ -88,7 +85,6 @@
     .badge-estado-inactivo { background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5; }
     .badge-voltaje { background: #FEF3C7; color: #B45309; }
 
-    /* MODAL Y ESTRUCTURA */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(15, 23, 42, 0.65);
@@ -128,7 +124,6 @@
 
     .modal-body { padding: 20px; overflow-y: auto; }
 
-    /* FOTOS Y VIDEO */
     .modal-photos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
     @media (max-width: 600px) { .modal-photos-grid { grid-template-columns: 1fr; } }
 
@@ -140,7 +135,6 @@
     .video-card { background: #000; border-radius: 6px; overflow: hidden; border: 1px solid var(--borde); }
     .video-card video { width: 100%; max-height: 380px; display: block; }
 
-    /* SECCIONES Y TABLAS */
     .modal-section { margin-bottom: 20px; }
     .section-header { 
       font-family: 'Oswald', sans-serif; font-size: 1.05rem; 
@@ -160,340 +154,4 @@
     <div class="header-info">
       <h1>Caracterización de Equipos</h1>
       <p>Mantenimiento & Proyectos — Carvajal Empaques</p>
-    </div>
-    <div class="logo-container">
-      <img src="logo/logo.png" alt="Carvajal Empaques" onerror="this.style.display='none'">
-    </div>
-  </header>
-
-  <div class="container">
-
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-num" id="kpi-total">0</div>
-        <div class="kpi-label">Equipos Registrados</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-num" id="kpi-activos">0</div>
-        <div class="kpi-label">Estado Activo</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-num" id="kpi-tipos">0</div>
-        <div class="kpi-label">Tipos de Máquina</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-num" id="kpi-fabricantes">0</div>
-        <div class="kpi-label">Fabricantes</div>
-      </div>
-    </div>
-
-    <div class="controls-panel">
-      <input type="text" id="input-busqueda" class="search-input" placeholder="Buscar por código, descripción, modelo...">
-      
-      <select id="filtro-planta" class="filter-select"><option value="">Planta — todas</option></select>
-      <select id="filtro-tipo" class="filter-select"><option value="">Tipo — todos</option></select>
-      <select id="filtro-estado" class="filter-select"><option value="">Estado — todos</option></select>
-      <select id="filtro-fabricante" class="filter-select"><option value="">Fabricante — todos</option></select>
-      
-      <button class="btn-clear" id="btn-limpiar">Limpiar filtros</button>
-    </div>
-
-    <div class="equipos-grid" id="galeria-equipos"></div>
-
-  </div>
-
-  <!-- MODAL / VENTANA EMERGENTE -->
-  <div class="modal-overlay" id="modal-detalle" onclick="cerrarModalAfuera(event)">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div class="modal-header-titles">
-          <h2 id="modal-codigo">CÓDIGO</h2>
-          <p id="modal-nombre">Descripción del equipo</p>
-        </div>
-        <button class="modal-close" onclick="cerrarModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        
-        <!-- 1. PRIMERO LAS DOS FOTOS -->
-        <div class="modal-photos-grid">
-          <div class="photo-card">
-            <img id="modal-img-equipo" src="" alt="Fotografía del Equipo">
-            <div class="photo-caption">Fotografía General</div>
-          </div>
-          <div class="photo-card">
-            <img id="modal-img-placa" src="" alt="Placa Técnica">
-            <div class="photo-caption">Placa Técnica / Seriales</div>
-          </div>
-        </div>
-
-        <!-- 2. DEBAJO EL VIDEO ABARCANDO TODO EL ANCHO -->
-        <div class="video-full-container" id="modal-container-video" style="display: none;">
-          <div class="video-card">
-            <video id="modal-video-equipo" controls preload="metadata">
-              <source id="modal-video-src" src="" type="video/mp4">
-            </video>
-          </div>
-        </div>
-
-        <!-- 3. DEBAJO LA INFORMACIÓN TÉCNICA Y ESPECIFICACIONES -->
-        <div class="modal-section" id="modal-sec-general">
-          <div class="section-header">Información General</div>
-          <table class="tech-table"><tbody id="modal-table-general"></tbody></table>
-        </div>
-
-        <div class="modal-section" id="modal-sec-tecnica">
-          <div class="section-header">Especificaciones Técnicas</div>
-          <table class="tech-table"><tbody id="modal-table-tecnica"></tbody></table>
-        </div>
-
-        <div class="modal-section" id="modal-sec-electrica">
-          <div class="section-header">Información Eléctrica</div>
-          <table class="tech-table"><tbody id="modal-table-electrica"></tbody></table>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <script>
-    let datosEquipos = [];
-
-    // EVALÚA Y OCULTA CAMPOS VACÍOS, CON GUIONES O SIN REGISTRAR
-    function esValorValido(val) {
-      if (val === undefined || val === null) return false;
-      const v = val.toString().trim().toUpperCase();
-      
-      if (v === "" || v === "N/A" || v === "NO APLICA" || v === "SIN DATOS" || v === "NULL" || v === "UNDEFINED") return false;
-      if (/^[-_\s]+$/.test(v)) return false; // Detecta "-", "--", "---", "----", etc.
-      
-      return true;
-    }
-
-    function getValorCampo(item, posiblesNombres) {
-      for (let nombre of posiblesNombres) {
-        const claveEncontrada = Object.keys(item).find(k => k.trim().toLowerCase() === nombre.toLowerCase());
-        if (claveEncontrada && item[claveEncontrada] !== undefined && item[claveEncontrada] !== null) {
-          const val = item[claveEncontrada].toString().trim();
-          if (esValorValido(val)) return val;
-        }
-      }
-      return "";
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const posiblesArchivos = ["CARACTERIZACIÓN.xlsx", "CARACTERIZACIÓN.csv", "CARACTERIZACION.xlsx", "caracterizacion.csv"];
-      intentarCargarArchivos(posiblesArchivos, 0);
-
-      document.getElementById("input-busqueda").addEventListener("input", renderizarApp);
-      document.getElementById("filtro-planta").addEventListener("change", renderizarApp);
-      document.getElementById("filtro-tipo").addEventListener("change", renderizarApp);
-      document.getElementById("filtro-estado").addEventListener("change", renderizarApp);
-      document.getElementById("filtro-fabricante").addEventListener("change", renderizarApp);
-      document.getElementById("btn-limpiar").addEventListener("click", () => {
-        document.getElementById("input-busqueda").value = "";
-        document.getElementById("filtro-planta").value = "";
-        document.getElementById("filtro-tipo").value = "";
-        document.getElementById("filtro-estado").value = "";
-        document.getElementById("filtro-fabricante").value = "";
-        renderizarApp();
-      });
-
-      document.addEventListener('keydown', (e) => { if (e.key === "Escape") cerrarModal(); });
-    });
-
-    function intentarCargarArchivos(archivos, idx) {
-      if (idx >= archivos.length) return;
-      fetch(archivos[idx])
-        .then(res => { if (!res.ok) throw new Error(); return res.arrayBuffer(); })
-        .then(buffer => {
-          const workbook = XLSX.read(buffer, { type: 'array' });
-          datosEquipos = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: "" });
-          poblarFiltros();
-          renderizarApp();
-        })
-        .catch(() => intentarCargarArchivos(archivos, idx + 1));
-    }
-
-    function poblarFiltros() {
-      const extraerUnicos = (nombres) => [...new Set(datosEquipos.map(e => getValorCampo(e, nombres)).filter(esValorValido))].sort();
-      const llenarSelect = (id, valores) => {
-        const select = document.getElementById(id);
-        select.innerHTML = `<option value="">${select.options[0].text}</option>`;
-        valores.forEach(v => { const opt = document.createElement("option"); opt.value = v; opt.textContent = v; select.appendChild(opt); });
-      };
-
-      llenarSelect("filtro-planta", extraerUnicos(["PLANTA", "UBICACION", "UBICACIÓN", "SITIO", "UBICACIÓN / PLANTA"]));
-      llenarSelect("filtro-tipo", extraerUnicos(["TIPO DE MAQUINA", "TIPO MAQUINA", "TIPO_MAQUINA", "TIPO", "CATEGORIA"]));
-      llenarSelect("filtro-estado", extraerUnicos(["ESTADO", "ESTADO_EQUIPO", "STATUS"]));
-      llenarSelect("filtro-fabricante", extraerUnicos(["FABRICANTE", "MARCA", "PROVEEDOR", "MARCA / FABRICANTE"]));
-    }
-
-    function probarSiguienteImagen(imgElement, codigoOriginal) {
-      const intentos = [`fotos/${codigoOriginal}.png`, `fotos/${codigoOriginal}.jpg`, `fotos/PLACA${codigoOriginal}.png`, `fotos/PLACA${codigoOriginal}.jpg`];
-      let idxActual = parseInt(imgElement.getAttribute("data-intent-idx") || "0", 10) + 1;
-      if (idxActual < intentos.length) {
-        imgElement.setAttribute("data-intent-idx", idxActual);
-        imgElement.src = intentos[idxActual];
-      } else {
-        imgElement.parentNode.innerHTML = `<span class="no-foto">Sin imagen</span>`;
-      }
-    }
-
-    function renderizarApp() {
-      const q = document.getElementById("input-busqueda").value.toLowerCase();
-      const fPlanta = document.getElementById("filtro-planta").value;
-      const fTipo = document.getElementById("filtro-tipo").value;
-      const fEstado = document.getElementById("filtro-estado").value;
-      const fFabricante = document.getElementById("filtro-fabricante").value;
-
-      const keysCodigo = ["CÓDIGO", "CODIGO", "COD_ORACLE", "CODIGO ORACLE"];
-      const keysDescrip = ["DESCRIPCION", "DESCRIPCIÓN", "EQUIPO", "NOMBRE", "DESCRIPCION CORTA"];
-      const keysModelo = ["MODELO"];
-      const keysPlanta = ["PLANTA", "UBICACION", "UBICACIÓN", "SITIO", "UBICACIÓN / PLANTA"];
-      const keysTipo = ["TIPO DE MAQUINA", "TIPO MAQUINA", "TIPO_MAQUINA", "TIPO", "CATEGORIA"];
-      const keysEstado = ["ESTADO", "ESTADO_EQUIPO", "STATUS"];
-      const keysFab = ["FABRICANTE", "MARCA", "PROVEEDOR", "MARCA / FABRICANTE"];
-      const keysVoltaje = ["VOLTAJE", "VOLTS", "VOLTAJE (V)"];
-
-      const filtrados = datosEquipos.filter(item => {
-        const codigo = getValorCampo(item, keysCodigo).toLowerCase();
-        const descrip = getValorCampo(item, keysDescrip).toLowerCase();
-        const modelo = getValorCampo(item, keysModelo).toLowerCase();
-        const planta = getValorCampo(item, keysPlanta);
-        const tipo = getValorCampo(item, keysTipo);
-        const estado = getValorCampo(item, keysEstado);
-        const fab = getValorCampo(item, keysFab);
-
-        return (!q || codigo.includes(q) || descrip.includes(q) || modelo.includes(q)) &&
-               (!fPlanta || planta === fPlanta) && (!fTipo || tipo === fTipo) &&
-               (!fEstado || estado === fEstado) && (!fFabricante || fab === fFabricante);
-      });
-
-      document.getElementById("kpi-total").textContent = filtrados.length;
-      document.getElementById("kpi-activos").textContent = filtrados.filter(e => ["ACTIVO", "OPERATIVO"].includes(getValorCampo(e, keysEstado).toUpperCase())).length;
-      document.getElementById("kpi-tipos").textContent = new Set(filtrados.map(e => getValorCampo(e, keysTipo)).filter(esValorValido)).size;
-      document.getElementById("kpi-fabricantes").textContent = new Set(filtrados.map(e => getValorCampo(e, keysFab)).filter(esValorValido)).size;
-
-      const galeria = document.getElementById("galeria-equipos");
-      galeria.innerHTML = "";
-
-      filtrados.forEach((item) => {
-        const codigo = getValorCampo(item, keysCodigo) || "N/A";
-        const descripcion = getValorCampo(item, keysDescrip) || "Sin descripción";
-        const tipo = getValorCampo(item, keysTipo) || "General";
-        const fab = getValorCampo(item, keysFab) || "N/R";
-        const mod = getValorCampo(item, keysModelo) || "N/R";
-        const planta = getValorCampo(item, keysPlanta);
-        const estado = getValorCampo(item, keysEstado);
-        const voltaje = getValorCampo(item, keysVoltaje);
-        const esInactivo = estado.toUpperCase().includes("INACTIVO");
-
-        const card = document.createElement("div");
-        card.className = "equipo-card";
-        card.onclick = () => abrirModal(item);
-        card.innerHTML = `
-          <div class="card-header-tag">
-            <span class="codigo">${codigo}</span>
-            <span class="tipo">${tipo}</span>
-          </div>
-          <div class="img-container">
-            <img src="fotos/${codigo}.png" alt="${codigo}" loading="lazy" data-intent-idx="0" onerror="probarSiguienteImagen(this, '${codigo}')">
-          </div>
-          <div class="card-body">
-            <div class="equipo-nombre" title="${descripcion}">${descripcion}</div>
-            <div class="specs-grid">
-              <div class="specs-item">Fabricante <span>${fab}</span></div>
-              <div class="specs-item">Modelo <span>${mod}</span></div>
-            </div>
-            <div class="badges-container">
-              ${planta ? `<span class="badge badge-planta">${planta}</span>` : ''}
-              ${estado ? `<span class="badge ${esInactivo ? 'badge-estado-inactivo' : 'badge-estado'}">${estado}</span>` : ''}
-              ${voltaje ? `<span class="badge badge-voltaje">${voltaje}</span>` : ''}
-            </div>
-          </div>
-        `;
-        galeria.appendChild(card);
-      });
-    }
-
-    function abrirModal(item) {
-      const keysCodigo = ["CÓDIGO", "CODIGO", "COD_ORACLE", "CODIGO ORACLE"];
-      const keysDescrip = ["DESCRIPCION", "DESCRIPCIÓN", "EQUIPO", "NOMBRE", "DESCRIPCION CORTA"];
-
-      const codigo = getValorCampo(item, keysCodigo) || "SIN CÓDIGO";
-      const descripcion = getValorCampo(item, keysDescrip) || "Sin Descripción";
-
-      document.getElementById("modal-codigo").textContent = codigo;
-      document.getElementById("modal-nombre").textContent = descripcion;
-
-      const imgEquipo = document.getElementById("modal-img-equipo");
-      const imgPlaca = document.getElementById("modal-img-placa");
-
-      imgEquipo.src = `fotos/${codigo}.png`;
-      imgEquipo.onerror = function() {
-        if (this.src.endsWith('.png')) this.src = `fotos/${codigo}.jpg`;
-        else this.src = 'https://via.placeholder.com/450x250/ffffff/94a3b8?text=SIN+FOTO+EQUIPO';
-      };
-
-      imgPlaca.src = `fotos/PLACA${codigo}.png`;
-      imgPlaca.onerror = function() {
-        if (this.src.endsWith('.png')) this.src = `fotos/PLACA${codigo}.jpg`;
-        else this.src = 'https://via.placeholder.com/450x250/ffffff/94a3b8?text=SIN+PLACA+TECNICA';
-      };
-
-      const containerVideo = document.getElementById("modal-container-video");
-      const videoElem = document.getElementById("modal-video-equipo");
-      const videoSrc = document.getElementById("modal-video-src");
-
-      videoSrc.src = `videos/${codigo}.mp4`;
-      videoElem.load();
-      containerVideo.style.display = "block";
-      videoElem.onerror = function() { containerVideo.style.display = "none"; };
-
-      const tableGeneral = document.getElementById("modal-table-general");
-      const tableTecnica = document.getElementById("modal-table-tecnica");
-      const tableElectrica = document.getElementById("modal-table-electrica");
-
-      tableGeneral.innerHTML = "";
-      tableTecnica.innerHTML = "";
-      tableElectrica.innerHTML = "";
-
-      const kwGeneral = ["CÓDIGO", "CODIGO", "DESCRIPCION", "DESCRIPCIÓN", "EQUIPO", "PLANTA", "UBICACION", "UBICACIÓN", "ESTADO", "SITIO", "AREA", "ÁREA", "LINEA", "LÍNEA"];
-      const kwElectrica = ["VOLTAJE", "VOLTS", "AMPERAJE", "AMP", "POTENCIA", "KW", "KVA", "HP", "CONEXION", "CONEXIÓN", "TABLERO", "ALIMENTACION", "ALIMENTACIÓN", "AIRE", "AGUA", "PRESION", "PRESIÓN", "GAS"];
-
-      Object.keys(item).forEach(key => {
-        const keyUpper = key.toUpperCase();
-        let val = item[key] !== undefined && item[key] !== null ? item[key].toString().trim() : "";
-
-        if (esValorValido(val)) {
-          const rowHtml = `<tr><td class="label-col">${key}</td><td class="value-col">${val}</td></tr>`;
-
-          if (kwElectrica.some(kw => keyUpper.includes(kw))) {
-            tableElectrica.innerHTML += rowHtml;
-          } else if (kwGeneral.some(kw => keyUpper.includes(kw))) {
-            tableGeneral.innerHTML += rowHtml;
-          } else {
-            tableTecnica.innerHTML += rowHtml;
-          }
-        }
-      });
-
-      document.getElementById("modal-sec-general").style.display = tableGeneral.children.length ? "block" : "none";
-      document.getElementById("modal-sec-tecnica").style.display = tableTecnica.children.length ? "block" : "none";
-      document.getElementById("modal-sec-electrica").style.display = tableElectrica.children.length ? "block" : "none";
-
-      document.getElementById("modal-detalle").classList.add("active");
-    }
-
-    function cerrarModal() {
-      const videoElem = document.getElementById("modal-video-equipo");
-      if (videoElem) videoElem.pause();
-      document.getElementById("modal-detalle").classList.remove("active");
-    }
-
-    function cerrarModalAfuera(e) {
-      if (e.target.id === "modal-detalle") cerrarModal();
-    }
-  </script>
-</body>
-</html>
+    </div
