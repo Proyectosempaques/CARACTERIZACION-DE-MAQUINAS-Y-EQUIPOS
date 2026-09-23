@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caracterización de Equipos — Carvajal Empaques</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .bg-carvajal { background-color: #3b1154; }
+        .text-carvajal { color: #3b1154; }
+        .border-carvajal { border-color: #3b1154; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-carvajal text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/10 p-2 rounded-lg backdrop-blur-sm">
+                    <i data-lucide="cpu" class="w-8 h-8 text-amber-400"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight">CARACTERIZACIÓN DE EQUIPOS</h1>
+                    <p class="text-xs text-purple-200">Mantenimiento & Proyectos — Carvajal Empaques</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 text-xs bg-white/10 px-3 py-1.5 rounded-full border border-white/20">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Base de Datos Activa</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+
+        <!-- Métricas Rápidas -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between text-slate-500 mb-1">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Total Equipos</span>
+                    <i data-lucide="database" class="w-4 h-4 text-purple-600"></i>
+                </div>
+                <div id="stat-total" class="text-2xl font-bold text-slate-800">0</div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between text-slate-500 mb-1">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Activos</span>
+                    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
+                </div>
+                <div id="stat-activos" class="text-2xl font-bold text-emerald-600">0</div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between text-slate-500 mb-1">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Tipos</span>
+                    <i data-lucide="layers" class="w-4 h-4 text-blue-600"></i>
+                </div>
+                <div id="stat-tipos" class="text-2xl font-bold text-slate-800">0</div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between text-slate-500 mb-1">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Fabricantes</span>
+                    <i data-lucide="factory" class="w-4 h-4 text-amber-600"></i>
+                </div>
+                <div id="stat-marcas" class="text-2xl font-bold text-slate-800">0</div>
+            </div>
+        </div>
+
+        <!-- Filtros y Búsqueda -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-3 items-center justify-between">
+            <div class="relative flex-grow min-w-[240px]">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="input-busqueda" placeholder="Buscar por código, descripción, modelo, marca..." 
+                    class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all">
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                <select id="select-planta" class="bg-slate-50 border border-slate-200 text-xs rounded-lg px-3 py-2 text-slate-700 font-medium focus:ring-2 focus:ring-purple-500">
+                    <option value="">Todas las Plantas</option>
+                </select>
+
+                <select id="select-tipo" class="bg-slate-50 border border-slate-200 text-xs rounded-lg px-3 py-2 text-slate-700 font-medium focus:ring-2 focus:ring-purple-500">
+                    <option value="">Todos los Tipos</option>
+                </select>
+
+                <select id="select-estado" class="bg-slate-50 border border-slate-200 text-xs rounded-lg px-3 py-2 text-slate-700 font-medium focus:ring-2 focus:ring-purple-500">
+                    <option value="">Todos los Estados</option>
+                </select>
+
+                <button id="btn-limpiar" class="px-3 py-2 text-xs font-medium text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1">
+                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                    Limpiar
+                </button>
+            </div>
+        </div>
+
+        <!-- Alertas de carga y error -->
+        <div id="loading-state" class="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-xl mb-6 flex items-center gap-3">
+            <i data-lucide="loader" class="w-5 h-5 animate-spin text-blue-600"></i>
+            <span class="text-sm font-medium">Cargando base de datos desde `caracterizacion.csv`...</span>
+        </div>
+
+        <div id="error-state" class="hidden bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-xl mb-6 flex items-center gap-3">
+            <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-600"></i>
+            <span id="error-mensaje" class="text-sm font-medium">Error al procesar el archivo.</span>
+        </div>
+
+        <!-- Grid de Tarjetas de Equipos -->
+        <div id="contenedor-equipos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+        <!-- Sin resultados -->
+        <div id="sin-resultados" class="hidden text-center py-12 bg-white rounded-xl border border-slate-200">
+            <i data-lucide="inbox" class="w-12 h-12 mx-auto text-slate-300 mb-3"></i>
+            <h3 class="text-base font-semibold text-slate-700">No se encontraron equipos</h3>
+            <p class="text-xs text-slate-500 mt-1">Intenta modificar los filtros de búsqueda.</p>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-8">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-400">
+            © 2026 Carvajal Empaques — Sistema de Caracterización de Equipos e Instalaciones
+        </div>
+    </footer>
+
+    <!-- Script de lógica y renderizado -->
+    <script>
+        let equipos = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            cargarDatosCSV();
+
+            // Event Listeners para Filtros
+            document.getElementById('input-busqueda').addEventListener('input', filtrarEquipos);
+            document.getElementById('select-planta').addEventListener('change', filtrarEquipos);
+            document.getElementById('select-tipo').addEventListener('change', filtrarEquipos);
+            document.getElementById('select-estado').addEventListener('change', filtrarEquipos);
+            document.getElementById('btn-limpiar').addEventListener('click', limpiarFiltros);
+        });
+
+        async function cargarDatosCSV() {
+            const loadingState = document.getElementById('loading-state');
+            const errorState = document.getElementById('error-state');
+
+            try {
+                // Petición al archivo CSV
+                const response = await fetch('caracterizacion.csv');
+                
+                if (!response.ok) {
+                    throw new Error(`No se pudo encontrar el archivo 'caracterizacion.csv' (Código: ${response.status}). Revisa que el nombre en GitHub esté exacto en minúsculas.`);
+                }
+
+                const text = await response.text();
+                equipos = parseCSV(text);
+
+                if (equipos.length === 0) {
+                    throw new Error("El archivo CSV está vacío o no tiene el formato correcto.");
+                }
+
+                loadingState.classList.add('hidden');
+                poblarFiltros();
+                actualizarEstadisticas(equipos);
+                renderizarEquipos(equipos);
+
+            } catch (err) {
+                loadingState.classList.add('hidden');
+                errorState.classList.remove('hidden');
+                document.getElementById('error-mensaje').textContent = err.message;
+                console.error("Error al cargar datos:", err);
+            }
+        }
+
+        // Función para parsear CSV reconociendo ',' y ';'
+        function parseCSV(text) {
+            const lines = text.split(/\r\n|\n/).filter(line => line.trim() !== '');
+            if (lines.length < 2) return [];
+
+            // Detectar separador (coma o punto y coma)
+            const firstLine = lines[0];
+            const separator = firstLine.includes(';') ? ';' : ',';
+
+            // Función auxiliar para separar respetando comillas
+            const splitLine = (line) => {
+                const regex = new RegExp(`(?:^|${separator})(?:"([^"]*)"|([^"${separator}]*))`, 'g');
+                const matches = [];
+                let match;
+                while ((match = regex.exec(line)) !== null) {
+                    matches.push((match[1] || match[2] || '').trim());
+                }
+                return matches;
+            };
+
+            const headers = splitLine(lines[0]).map(h => h.toUpperCase());
+
+            return lines.slice(1).map(line => {
+                const values = splitLine(line);
+                let row = {};
+
+                headers.forEach((header, index) => {
+                    row[header] = values[index] || '';
+                });
+
+                // Mapeo flexible de columnas de tu CSV
+                return {
+                    codigo: row['CÓDIGO'] || row['CODIGO'] || 'S/N',
+                    descripcion: row['DESCRIPCION'] || row['DESCRIPCIÓN'] || 'Sin descripción',
+                    tipo: row['TIPO'] || 'No especificado',
+                    departamento: row['DEPARTAMENTO'] || 'N/A',
+                    marca: row['MARCA / FABRICANTE'] || row['MARCA'] || row['FABRICANTE'] || 'N/A',
+                    modelo: row['MODELO'] || 'N/A',
+                    serie: row['SERIE'] || 'N/A',
+                    planta: row['UBICACIÓN / PLANTA'] || row['UBICACION / PLANTA'] || row['PLANTA'] || 'N/A',
+                    estado: row['ESTADO'] || 'Inactivo',
+                    voltaje: row['VOLTAJE (V)'] || row['VOLTAJE'] || 'N/A',
+                    potencia: row['POTENCIA (KW/HP)'] || row['POTENCIA'] || 'N/A',
+                    anio: row['AÑO'] || row['ANIO'] || 'N/A',
+                    descripcionCorta: row['DESCRIPCION CORTA'] || row['DESCRIPCIÓN CORTA'] || ''
+                };
+            });
+        }
+
+        function poblarFiltros() {
+            const plantas = [...new Set(equipos.map(e => e.planta))].filter(Boolean).sort();
+            const tipos = [...new Set(equipos.map(e => e.tipo))].filter(Boolean).sort();
+            const estados = [...new Set(equipos.map(e => e.estado))].filter(Boolean).sort();
+
+            const selectPlanta = document.getElementById('select-planta');
+            const selectTipo = document.getElementById('select-tipo');
+            const selectEstado = document.getElementById('select-estado');
+
+            plantas.forEach(p => selectPlanta.innerHTML += `<option value="${p}">${p}</option>`);
+            tipos.forEach(t => selectTipo.innerHTML += `<option value="${t}">${t}</option>`);
+            estados.forEach(e => selectEstado.innerHTML += `<option value="${e}">${e}</option>`);
+        }
+
+        function actualizarEstadisticas(data) {
+            document.getElementById('stat-total').textContent = data.length;
+            document.getElementById('stat-activos').textContent = data.filter(e => e.estado.toLowerCase() === 'activo').length;
+            document.getElementById('stat-tipos').textContent = new Set(data.map(e => e.tipo)).size;
+            document.getElementById('stat-marcas').textContent = new Set(data.map(e => e.marca)).size;
+        }
+
+        function renderizarEquipos(listado) {
+            const contenedor = document.getElementById('contenedor-equipos');
+            const sinResultados = document.getElementById('sin-resultados');
+            contenedor.innerHTML = '';
+
+            if (listado.length === 0) {
+                sinResultados.classList.remove('hidden');
+                return;
+            }
+
+            sinResultados.classList.add('hidden');
+
+            listado.forEach(item => {
+                const esActivo = item.estado.toLowerCase() === 'activo';
+                const estadoClass = esActivo ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600';
+
+                const cardHTML = `
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
+                        <!-- Imagen/Video con fallback -->
+                        <div class="relative h-44 bg-slate-100 overflow-hidden group">
+                            <img src="fotos/${item.codigo}.png" 
+                                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=500&q=80';" 
+                                 alt="${item.descripcion}" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            
+                            <div class="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-xs font-bold px-2.5 py-1 rounded-md">
+                                ${item.codigo}
+                            </div>
+
+                            <div class="absolute top-3 right-3 text-[10px] font-semibold px-2 py-0.5 rounded-full ${estadoClass}">
+                                ${item.estado}
+                            </div>
+                        </div>
+
+                        <!-- Contenido -->
+                        <div class="p-4">
+                            <div class="text-xs text-purple-700 font-medium uppercase tracking-wide mb-1">
+                                ${item.tipo} • ${item.planta}
+                            </div>
+                            <h3 class="text-base font-bold text-slate-800 mb-2 line-clamp-1" title="${item.descripcion}">
+                                ${item.descripcion}
+                            </h3>
+                            
+                            ${item.descripcionCorta ? `<p class="text-xs text-slate-500 mb-3 line-clamp-2">${item.descripcionCorta}</p>` : ''}
+
+                            <!-- Parámetros Técnicos -->
+                            <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2.5 rounded-lg border border-slate-100 mb-3">
+                                <div><span class="text-slate-400">Marca:</span> <span class="font-medium text-slate-700">${item.marca}</span></div>
+                                <div><span class="text-slate-400">Modelo:</span> <span class="font-medium text-slate-700">${item.modelo}</span></div>
+                                <div><span class="text-slate-400">Voltaje:</span> <span class="font-medium text-slate-700">${item.voltaje}</span></div>
+                                <div><span class="text-slate-400">Potencia:</span> <span class="font-medium text-slate-700">${item.potencia}</span></div>
+                            </div>
+
+                            <div class="flex justify-between items-center text-[11px] text-slate-400 pt-2 border-t border-slate-100">
+                                <span>Serie: ${item.serie}</span>
+                                <span>Año: ${item.anio}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                contenedor.innerHTML += cardHTML;
+            });
+
+            lucide.createIcons();
+        }
+
+        function filtrarEquipos() {
+            const busqueda = document.getElementById('input-busqueda').value.toLowerCase();
+            const planta = document.getElementById('select-planta').value;
+            const tipo = document.getElementById('select-tipo').value;
+            const estado = document.getElementById('select-estado').value;
+
+            const filtrados = equipos.filter(e => {
+                const coincideTexto = !busqueda || 
+                    e.codigo.toLowerCase().includes(busqueda) ||
+                    e.descripcion.toLowerCase().includes(busqueda) ||
+                    e.marca.toLowerCase().includes(busqueda) ||
+                    e.modelo.toString().toLowerCase().includes(busqueda) ||
+                    e.descripcionCorta.toLowerCase().includes(busqueda);
+
+                const coincidePlanta = !planta || e.planta === planta;
+                const coincideTipo = !tipo || e.tipo === tipo;
+                const coincideEstado = !estado || e.estado === estado;
+
+                return coincideTexto && coincidePlanta && coincideTipo && coincideEstado;
+            });
+
+            actualizarEstadisticas(filtrados);
+            renderizarEquipos(filtrados);
+        }
+
+        function limpiarFiltros() {
+            document.getElementById('input-busqueda').value = '';
+            document.getElementById('select-planta').value = '';
+            document.getElementById('select-tipo').value = '';
+            document.getElementById('select-estado').value = '';
+            filtrarEquipos();
+        }
+    </script>
+</body>
+</html>
