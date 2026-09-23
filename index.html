@@ -80,7 +80,7 @@
     .btn-clear { padding: 8px 14px; background: #E2E8F0; color: #475569; border: none; border-radius: 4px; font-weight: 600; font-size: 0.82rem; cursor: pointer; }
     .btn-clear:hover { background: #CBD5E1; }
 
-    /* BOTÓN HISTORIAL Y DADAS DE BAJA */
+    /* BOTON HISTORIAL Y DADAS DE BAJA */
     .btn-bajas {
       padding: 8px 14px;
       background: #FEF2F2;
@@ -90,9 +90,6 @@
       font-weight: 700;
       font-size: 0.82rem;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
       transition: all 0.2s;
     }
     .btn-bajas:hover { background: #FEE2E2; }
@@ -124,7 +121,7 @@
     .badge-estado-inactivo { background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5; }
     .badge-voltaje { background: #FEF3C7; color: #B45309; }
 
-    /* MODAL Y ESTRUCTURA */
+    /* MODAL Y ESTRUCTURA ORIGINAL */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(15, 23, 42, 0.65);
@@ -190,36 +187,62 @@
     .tech-table td.label-col { width: 35%; padding: 8px 12px; font-weight: 700; color: var(--texto-secundario); text-transform: uppercase; font-size: 0.78rem; border-right: 1px solid var(--borde); }
     .tech-table td.value-col { width: 65%; padding: 8px 12px; font-weight: 600; color: var(--texto-principal); word-break: break-word; }
 
-    /* BOTÓN CALCULADORA */
+    /* BOTON CALCULADORA */
     .btn-calc {
       background: var(--carvajal-verde);
       color: #ffffff;
       border: none;
-      padding: 5px 10px;
+      padding: 4px 10px;
       border-radius: 4px;
       font-size: 0.75rem;
       font-weight: 600;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
     }
     .btn-calc:hover { background: #008f4c; }
 
-    /* PANEL CALCULADORA DENTRO DEL MODAL */
-    .calc-box {
+    /* CALCULADORA BASICA INTEGRADA */
+    .calc-container {
       background: #F8FAFC;
-      border: 1px solid #CBD5E1;
+      border: 1px solid var(--borde);
       border-radius: 6px;
-      padding: 12px;
-      margin-bottom: 15px;
+      padding: 10px;
+      margin-bottom: 12px;
       display: none;
+      max-width: 260px;
     }
-    .calc-box.active { display: block; }
-    .calc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 8px; }
-    .calc-field label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--texto-secundario); text-transform: uppercase; }
-    .calc-field input, .calc-field select { width: 100%; padding: 6px; border: 1px solid var(--borde); border-radius: 4px; font-size: 0.8rem; margin-top: 2px; }
-    .calc-results { margin-top: 10px; padding: 8px; background: #E0F2FE; border-radius: 4px; font-size: 0.8rem; color: #0369A1; font-weight: 600; display: flex; justify-content: space-around; }
+    .calc-container.active { display: block; }
+    .calc-display {
+      width: 100%;
+      height: 36px;
+      background: #FFFFFF;
+      border: 1px solid var(--borde);
+      border-radius: 4px;
+      text-align: right;
+      padding: 0 10px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--texto-principal);
+      margin-bottom: 8px;
+    }
+    .calc-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+    }
+    .calc-btn {
+      padding: 8px 0;
+      background: #FFFFFF;
+      border: 1px solid var(--borde);
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      color: var(--texto-principal);
+    }
+    .calc-btn:hover { background: #E2E8F0; }
+    .calc-btn.op { background: #E0F2FE; color: #0369A1; }
+    .calc-btn.equal { background: var(--carvajal-naranja); color: #FFF; border-color: var(--carvajal-naranja); }
+    .calc-btn.clear { background: #FEE2E2; color: #991B1B; }
 
     /* MODAL LOGIN */
     .login-overlay {
@@ -247,7 +270,7 @@
 </head>
 <body>
 
-  <!-- MODAL INICIO DE SESIÓN -->
+  <!-- MODAL INICIO DE SESION -->
   <div class="login-overlay" id="login-modal">
     <div class="login-card">
       <h2>Iniciar Sesión</h2>
@@ -299,7 +322,7 @@
       <input type="text" id="input-busqueda" class="search-input" placeholder="Buscar por código, descripción, modelo...">
       
       <button class="btn-bajas" id="btn-bajas" onclick="toggleModoBajas()">
-        <span>🗑️</span> Historial / Dadas de Baja
+        Historial / Dadas de Baja
       </button>
 
       <select id="filtro-planta" class="filter-select"><option value="">Planta — todas</option></select>
@@ -314,7 +337,7 @@
 
   </div>
 
-  <!-- MODAL / VENTANA EMERGENTE -->
+  <!-- MODAL / VENTANA EMERGENTE ORIGINAL -->
   <div class="modal-overlay" id="modal-detalle" onclick="cerrarModalAfuera(event)">
     <div class="modal-content">
       <div class="modal-header">
@@ -361,36 +384,34 @@
         <div class="modal-section" id="modal-sec-electrica">
           <div class="section-header">
             <span>Información Eléctrica</span>
-            <button class="btn-calc" onclick="toggleCalculadora()">🧮 Calculadora Eléctrica</button>
+            <button class="btn-calc" onclick="toggleCalculadora()">Calculadora</button>
           </div>
 
-          <!-- CALCULADORA ELÉCTRICA DENTRO DEL MODAL -->
-          <div class="calc-box" id="calc-box">
-            <div style="font-size: 0.75rem; font-weight:700; color:var(--carvajal-violeta); text-transform:uppercase;">Calculadora Electrotécnica AC</div>
-            <div class="calc-grid">
-              <div class="calc-field">
-                <label>Fases</label>
-                <select id="calc-fases" onchange="calcularElectrica()">
-                  <option value="3">Trifásico (3Ø)</option>
-                  <option value="1">Monofásico (1Ø)</option>
-                </select>
-              </div>
-              <div class="calc-field">
-                <label>Voltaje (V)</label>
-                <input type="number" id="calc-v" value="440" oninput="calcularElectrica()">
-              </div>
-              <div class="calc-field">
-                <label>Corriente (A)</label>
-                <input type="number" id="calc-i" value="0" placeholder="0" oninput="calcularElectrica()">
-              </div>
-              <div class="calc-field">
-                <label>FP (Cos φ)</label>
-                <input type="number" id="calc-fp" value="0.85" step="0.01" min="0" max="1" oninput="calcularElectrica()">
-              </div>
-            </div>
-            <div class="calc-results">
-              <div>Potencia: <span id="res-kw">0.00</span> kW</div>
-              <div>Aparente: <span id="res-kva">0.00</span> kVA</div>
+          <!-- CALCULADORA BASICA -->
+          <div class="calc-container" id="calc-container">
+            <input type="text" id="calc-display" class="calc-display" value="0" readonly>
+            <div class="calc-buttons">
+              <button class="calc-btn clear" onclick="calcClear()">C</button>
+              <button class="calc-btn op" onclick="calcAppend('/')">/</button>
+              <button class="calc-btn op" onclick="calcAppend('*')">*</button>
+              <button class="calc-btn op" onclick="calcAppend('-')">-</button>
+
+              <button class="calc-btn" onclick="calcAppend('7')">7</button>
+              <button class="calc-btn" onclick="calcAppend('8')">8</button>
+              <button class="calc-btn" onclick="calcAppend('9')">9</button>
+              <button class="calc-btn op" onclick="calcAppend('+')">+</button>
+
+              <button class="calc-btn" onclick="calcAppend('4')">4</button>
+              <button class="calc-btn" onclick="calcAppend('5')">5</button>
+              <button class="calc-btn" onclick="calcAppend('6')">6</button>
+              <button class="calc-btn equal" onclick="calcSolve()" style="grid-row: span 2; height: 100%;">=</button>
+
+              <button class="calc-btn" onclick="calcAppend('1')">1</button>
+              <button class="calc-btn" onclick="calcAppend('2')">2</button>
+              <button class="calc-btn" onclick="calcAppend('3')">3</button>
+
+              <button class="calc-btn" onclick="calcAppend('0')" style="grid-column: span 2;">0</button>
+              <button class="calc-btn" onclick="calcAppend('.')">.</button>
             </div>
           </div>
 
@@ -406,35 +427,45 @@
     let usuariosAutorizados = [];
     let modoBajas = false;
 
-    // EVALÚA Y OCULTA CAMPOS VACÍOS, CON GUIONES O SIN REGISTRAR
+    // EVALUA Y OCULTA CAMPOS VACIOS, CON GUIONES O SIN REGISTRAR
     function esValorValido(val) {
       if (val === undefined || val === null) return false;
-      const v = val.toString().trim().toUpperCase();
+      const v = val.toString().replace(/^\uFEFF/, '').trim().toUpperCase();
       if (v === "" || v === "N/A" || v === "NO APLICA" || v === "SIN DATOS" || v === "NULL" || v === "UNDEFINED") return false;
       if (/^[-_\s]+$/.test(v)) return false;
       return true;
     }
 
     function getValorCampo(item, posiblesNombres) {
+      if (!item) return "";
+      const normalizar = text => text.toString().replace(/^\uFEFF/, '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
+
       for (let nombre of posiblesNombres) {
-        const claveEncontrada = Object.keys(item).find(k => k.trim().toLowerCase() === nombre.toLowerCase());
+        const objetivo = normalizar(nombre);
+        const claveEncontrada = Object.keys(item).find(k => normalizar(k) === objetivo);
+        
         if (claveEncontrada && item[claveEncontrada] !== undefined && item[claveEncontrada] !== null) {
-          const val = item[claveEncontrada].toString().trim();
+          const val = item[claveEncontrada].toString().replace(/^\uFEFF/, '').trim();
           if (esValorValido(val)) return val;
         }
       }
       return "";
     }
 
-    // LECTURA ROBUSTA DE CSV COMPATIBLE CON GITHUB
+    // PARSER CSV AVANZADO CON SOPORTE COMPLETO
     function parseCSV(text) {
-      const lines = text.split(/\r\n|\n/);
+      text = text.replace(/^\uFEFF/, '');
+      const lines = text.split(/\r\n|\n/).filter(line => line.trim() !== "");
       if (!lines.length) return [];
-      const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+
+      const firstLine = lines[0];
+      const separator = (firstLine.match(/;/g) || []).length > (firstLine.match(/,/g) || []).length ? ';' : ',';
+      const headers = firstLine.split(separator).map(h => h.trim().replace(/^"|"$/g, ''));
       const result = [];
+
       for (let i = 1; i < lines.length; i++) {
-        if (!lines[i].trim()) continue;
-        const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+        const regex = new RegExp(`${separator}(?=(?:(?:[^"]*"){2})*[^"]*$)`);
+        const row = lines[i].split(regex);
         const obj = {};
         headers.forEach((h, idx) => {
           let val = row[idx] ? row[idx].trim().replace(/^"|"$/g, '') : "";
@@ -447,7 +478,7 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       cargarUsuarios();
-      
+
       if (sessionStorage.getItem("sesionIniciada") === "true") {
         document.getElementById("login-modal").style.display = "none";
         document.getElementById("btn-logout").style.display = "block";
@@ -471,7 +502,7 @@
       document.addEventListener('keydown', (e) => { if (e.key === "Escape") cerrarModal(); });
     });
 
-    // SISTEMA DE USUARIOS Y LOGIN
+    // MANEJO DE SESION Y USUARIOS
     function cargarUsuarios() {
       const archivosUsuarios = ["usuarios.csv", "usuarios.xlsx", "USUARIOS.csv", "USUARIOS.xlsx"];
       intentarCargarUsuarios(archivosUsuarios, 0);
@@ -521,7 +552,7 @@
     }
 
     function iniciarApp() {
-      const posiblesArchivos = ["CARACTERIZACIÓN.csv", "CARACTERIZACIÓN.xlsx", "caracterizacion.csv", "CARACTERIZACION.xlsx"];
+      const posiblesArchivos = ["CARACTERIZACIÓN.csv", "CARACTERIZACIÓN.xlsx", "CARACTERIZACION.csv", "CARACTERIZACION.xlsx"];
       intentarCargarArchivos(posiblesArchivos, 0);
     }
 
@@ -578,14 +609,14 @@
 
       if (modoBajas) {
         btn.classList.add("active");
-        btn.innerHTML = `<span>📋</span> Ver Catálogo Activo`;
+        btn.textContent = "Ver Catálogo Activo";
         card1.classList.add("baja-mode");
         card2.classList.add("baja-mode");
         lbl1.textContent = "Equipos Dadas de Baja";
         lbl2.textContent = "Total Histórico Bajas";
       } else {
         btn.classList.remove("active");
-        btn.innerHTML = `<span>🗑️</span> Historial / Dadas de Baja`;
+        btn.textContent = "Historial / Dadas de Baja";
         card1.classList.remove("baja-mode");
         card2.classList.remove("baja-mode");
         lbl1.textContent = "Equipos Registrados";
@@ -612,7 +643,6 @@
 
         const esBaja = estado.toUpperCase().includes("BAJA") || estado.toUpperCase().includes("INACTIVO");
 
-        // FILTRADO SEGÚN EL MODO HISTORIAL O CATÁLOGO
         if (modoBajas && !esBaja) return false;
         if (!modoBajas && esBaja) return false;
 
@@ -627,7 +657,7 @@
       } else {
         document.getElementById("kpi-activos").textContent = filtrados.filter(e => ["ACTIVO", "OPERATIVO"].includes(getValorCampo(e, ["ESTADO", "ESTADO_EQUIPO", "STATUS"]).toUpperCase())).length;
       }
-      
+
       document.getElementById("kpi-tipos").textContent = new Set(filtrados.map(e => getValorCampo(e, ["TIPO DE MAQUINA", "TIPO MAQUINA", "TIPO"])).filter(esValorValido)).size;
       document.getElementById("kpi-fabricantes").textContent = new Set(filtrados.map(e => getValorCampo(e, ["FABRICANTE", "MARCA"])).filter(esValorValido)).size;
 
@@ -677,6 +707,7 @@
       galeria.appendChild(fragment);
     }
 
+    // ABRIR MODAL MANTENIENDO EXACTAMENTE LA LOGICA ORIGINAL
     function abrirModal(item) {
       const codigo = getValorCampo(item, ["CÓDIGO", "CODIGO", "COD_ORACLE", "CODIGO ORACLE"]) || "SIN CÓDIGO";
       const descripcion = getValorCampo(item, ["DESCRIPCION", "DESCRIPCIÓN", "EQUIPO", "NOMBRE"]) || "Sin Descripción";
@@ -719,8 +750,6 @@
       const kwGeneral = ["CÓDIGO", "CODIGO", "DESCRIPCION", "DESCRIPCIÓN", "EQUIPO", "PLANTA", "UBICACION", "UBICACIÓN", "ESTADO", "SITIO", "AREA", "ÁREA", "LINEA", "LÍNEA"];
       const kwElectrica = ["VOLTAJE", "VOLTS", "AMPERAJE", "AMP", "POTENCIA", "KW", "KVA", "HP", "CONEXION", "CONEXIÓN", "TABLERO", "ALIMENTACION", "ALIMENTACIÓN", "AIRE", "AGUA", "PRESION", "PRESIÓN", "GAS"];
 
-      let vAuto = 440, iAuto = 0;
-
       Object.keys(item).forEach(key => {
         const keyUpper = key.toUpperCase();
         let val = item[key] !== undefined && item[key] !== null ? item[key].toString().trim() : "";
@@ -730,16 +759,6 @@
 
           if (kwElectrica.some(kw => keyUpper.includes(kw))) {
             tableElectrica.innerHTML += rowHtml;
-
-            // Extraer voltaje e intensidad para autocargar la calculadora
-            if (keyUpper.includes("VOLT")) {
-              const num = parseFloat(val.replace(/[^0-9.]/g, ''));
-              if (!isNaN(num)) vAuto = num;
-            }
-            if (keyUpper.includes("AMP")) {
-              const num = parseFloat(val.replace(/[^0-9.]/g, ''));
-              if (!isNaN(num)) iAuto = num;
-            }
           } else if (kwGeneral.some(kw => keyUpper.includes(kw))) {
             tableGeneral.innerHTML += rowHtml;
           } else {
@@ -748,11 +767,6 @@
         }
       });
 
-      // Autocargar datos detectados a la calculadora
-      document.getElementById("calc-v").value = vAuto;
-      document.getElementById("calc-i").value = iAuto;
-      calcularElectrica();
-
       document.getElementById("modal-sec-general").style.display = tableGeneral.children.length ? "block" : "none";
       document.getElementById("modal-sec-tecnica").style.display = tableTecnica.children.length ? "block" : "none";
       document.getElementById("modal-sec-electrica").style.display = tableElectrica.children.length ? "block" : "none";
@@ -760,35 +774,36 @@
       document.getElementById("modal-detalle").classList.add("active");
     }
 
+    // LOGICA CALCULADORA BASICA
     function toggleCalculadora() {
-      const box = document.getElementById("calc-box");
-      box.classList.toggle("active");
+      const container = document.getElementById("calc-container");
+      container.classList.toggle("active");
     }
 
-    function calcularElectrica() {
-      const fases = parseInt(document.getElementById("calc-fases").value, 10);
-      const v = parseFloat(document.getElementById("calc-v").value) || 0;
-      const i = parseFloat(document.getElementById("calc-i").value) || 0;
-      const fp = parseFloat(document.getElementById("calc-fp").value) || 0.85;
+    function calcAppend(val) {
+      const display = document.getElementById("calc-display");
+      if (display.value === "0" || display.value === "Error") display.value = val;
+      else display.value += val;
+    }
 
-      let kw = 0, kva = 0;
+    function calcClear() {
+      document.getElementById("calc-display").value = "0";
+    }
 
-      if (fases === 3) {
-        kva = (Math.sqrt(3) * v * i) / 1000;
-      } else {
-        kva = (v * i) / 1000;
+    function calcSolve() {
+      const display = document.getElementById("calc-display");
+      try {
+        display.value = eval(display.value.replace(/[^0-9+\-*/.]/g, ''));
+      } catch (e) {
+        display.value = "Error";
       }
-      kw = kva * fp;
-
-      document.getElementById("res-kw").textContent = kw.toFixed(2);
-      document.getElementById("res-kva").textContent = kva.toFixed(2);
     }
 
     function cerrarModal() {
       const videoElem = document.getElementById("modal-video-equipo");
       if (videoElem) videoElem.pause();
       document.getElementById("modal-detalle").classList.remove("active");
-      document.getElementById("calc-box").classList.remove("active");
+      document.getElementById("calc-container").classList.remove("active");
     }
 
     function cerrarModalAfuera(e) {
