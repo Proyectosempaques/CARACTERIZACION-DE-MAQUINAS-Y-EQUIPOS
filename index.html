@@ -480,21 +480,216 @@
       document.addEventListener('keydown', (e) => { if (e.key === "Escape") cerrarModal(); });
     });
 
-    function procesarLogin(e) {
-      e.preventDefault();
-      const u = document.getElementById("login-user").value.trim().toLowerCase();
-      const p = document.getElementById("login-pass").value.trim();
+    async function procesarLogin(e) {
+  e.preventDefault();
 
-      if (u === "admin" && p === "carvajal2026") {
-        sessionStorage.setItem("sesionIniciada", "true");
-        document.getElementById("login-modal").style.display = "none";
-        document.getElementById("btn-logout").style.display = "block";
-        document.getElementById("login-error").style.display = "none";
-        iniciarApp();
+  const usuarioInput = document.getElementById("login-user");
+  const claveInput = document.getElementById("login-pass");
+  const mensajeError = document.getElementById("login-error");
+
+  const usuarioIngresado = usuarioInput.value.trim().toLowerCase();
+  const claveIngresada = claveInput.value.trim();
+
+  mensajeError.style.display = "none";
+  mensajeError.textContent = "Usuario o contraseña incorrectos.";
+
+  if (!usuarioIngresado || !claveIngresada) {
+    mensajeError.textContent = "Ingrese usuario y contraseña.";
+    mensajeError.style.display = "block";
+    return;
+  }
+
+  try {
+    const respuesta = await fetch(
+      "usuarios.csv?" + new Date().getTime(),
+      {
+        method: "GET",
+        cache: "no-store"
+      }
+    );
+
+    if (!respuesta.ok) {
+      throw new Error(
+        `No se pudo cargar usuarios.csv. Código HTTP: ${respuesta.status}`
+      );
+    }
+
+    const contenidoCSV = await respuesta.text();
+
+    if (!contenidoCSV.trim()) {
+      throw new Error("El archivo usuarios.csv está vacío.");
+    }
+
+    const usuarios = leerUsuariosCSV(contenidoCSV);
+
+    const usuarioValido = usuarios.some(usuario => {
+      return (
+        usuario.usuario.toLowerCase() === usuarioIngresado &&
+        usuario.contrasena === claveIngresada
+      );
+    });
+
+    if (usuarioValido) {
+      sessionStorage.setItem("sesionIniciada", "true");
+
+      document.getElementById("login-modal").style.display = "none";
+      document.getElementById("btn-logout").style.display = "block";
+      mensajeError.style.display = "none";
+
+      iniciarApp();
+    } else {
+      mensajeError.textContent = "Usuario o contraseña incorrectos.";
+      mensajeError.style.display = "block";
+
+      claveInput.value = "";
+      claveInput.focus();
+    }
+
+  } catch (error) {
+    console.error("Error al validar el inicio de sesión:", error);
+
+    mensajeError.textContent =
+      "No se pudo cargar usuarios.csv. Verifique que el archivo exista y esté publicado.";
+    mensajeError.style.display = "block";
+  }
+}
+
+
+function leerUsuariosCSV(texto) {
+  texto = texto
+    .replace(/^\uFEFF/, "")
+    .trim();
+
+  if (!texto) {
+    return [];
+  }
+
+  const lineas = texto
+    .split(/\r\n|\n|\r/)
+    .filter(linea => linea.trim() !== "");
+
+  if (lineas.length < 2) {
+    return [];
+  }
+
+  /*
+    Detecta automáticamente si el archivo utiliza coma o punto y coma.
+  */
+  const primeraLinea = lineas[0];
+
+  const cantidadComas =
+    (primeraLinea.match(/,/g) || []).length;
+
+  const cantidadPuntoComa =
+    (primeraLinea.match(/;/g) || []).length;
+
+  const separador =
+    cantidadPuntoComa > cantidadComas ? ";" : ",";
+
+
+  function dividirFila(fila) {
+    const valores = [];
+    let valorActual = "";
+    let dentroDeComillas = false;
+
+    for (let i = 0; i < fila.length; i++) {
+      const caracter = fila[i];
+
+      if (caracter === '"') {
+        dentroDeComillas = !dentroDeComillas;
+      } else if (
+        caracter === separador &&
+        !dentroDeComillas
+      ) {
+        valores.push(
+          valorActual
+            .trim()
+            .replace(/^"|"$/g, "")
+        );
+
+        valorActual = "";
       } else {
-        document.getElementById("login-error").style.display = "block";
+        valorActual += caracter;
       }
     }
+
+    valores.push(
+      valorActual
+        .trim()
+        .replace(/^"|"$/g, "")
+    );
+
+    return valores;
+  }
+
+
+  /*
+    Convierte los encabezados a minúsculas y elimina tildes.
+    Por eso funcionan tanto CONTRASEÑA como CONTRASENA.
+  */
+  function normalizarEncabezado(valor) {
+    return valor
+      .replace(/^\uFEFF/, "")
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  }
+
+  const encabezados = dividirFila(lineas[0])
+    .map(normalizarEncabezado);
+
+  const posicionUsuario = encabezados.findIndex(encabezado =>
+    [
+      "usuario",
+      "user",
+      "username",
+      "nombre_usuario"
+    ].includes(encabezado)
+  );
+
+  const posicionContrasena = encabezados.findIndex(encabezado =>
+    [
+      "contrasena",
+      "clave",
+      "password",
+      "pass"
+    ].includes(encabezado)
+  );
+
+  if (
+    posicionUsuario === -1 ||
+    posicionContrasena === -1
+  ) {
+    throw new Error(
+      "usuarios.csv debe contener las columnas USUARIO y CONTRASEÑA."
+    );
+  }
+
+  const usuarios = [];
+
+  for (let i = 1; i < lineas.length; i++) {
+    const valores = dividirFila(lineas[i]);
+
+    const usuario =
+      valores[posicionUsuario] || "";
+
+    const contrasena =
+      valores[posicionContrasena] || "";
+
+    if (
+      usuario.trim() !== "" &&
+      contrasena.trim() !== ""
+    ) {
+      usuarios.push({
+        usuario: usuario.trim(),
+        contrasena: contrasena.trim()
+      });
+    }
+  }
+
+  return usuarios;
+}
 
     function cerrarSesion() {
       sessionStorage.removeItem("sesionIniciada");
